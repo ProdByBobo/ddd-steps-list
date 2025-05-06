@@ -6,41 +6,131 @@ import { LitElement, html, css } from "lit";
 import { DDDSuper } from "@haxtheweb/d-d-d/d-d-d.js";
 import { I18NMixin } from "@haxtheweb/i18n-manager/lib/I18NMixin.js";
 
-/**
- * `ddd-steps-list`
- * 
- * A custom element for displaying a list of steps with numbered circles and titles.
- * 
- * @demo index.html
- * @element ddd-steps-list
- */
-export class DddStepsList extends DDDSuper(I18NMixin(LitElement)) {
-  static get tag() {
-    return "ddd-steps-list";
-  }
-
+// ddd-steps-list-item definition
+class DddStepsListItem extends LitElement {
   static get properties() {
     return {
-      dddPrimary: { type: Boolean, attribute: "ddd-primary", reflect: true },
+      step: { type: Number, reflect: true },
+      dddPrimary: { type: Boolean, reflect: true }
+      
     };
   }
 
   constructor() {
     super();
-    this.dddPrimary = false; // Default value for the `ddd-primary` attribute
-    this.title = ""; // Default title for localization
-    this.t = this.t || {};
-    this.t = {
-      ...this.t,
-      title: "Steps", // Default title that can be overridden by localization
-    };
+    this.step = 0;
+    this.dddPrimary = false;
   }
 
   static get styles() {
     return css`
       :host {
         display: block;
-        counter-reset: step; /* Initialize the counter for step numbers */
+        margin-bottom: var(--ddd-spacing-6, 24px);
+        
+      }
+      .step-title {
+      font-size: var(--ddd-font-size-lg, 2rem);
+      font-weight: var(--ddd-font-weight-bold, bold);
+      margin-top: var(--ddd-spacing-2, 8px);
+      color: var(--ddd-theme-primary, #1e407c);
+    }
+
+      :host(:last-child) {
+        margin-bottom: 0;
+      }
+
+      .step-wrapper {
+        display: flex;
+        align-items: flex-start;
+        color: inherit;
+      }
+
+      .step-circle {
+        width: var(--ddd-spacing-8, 32px);
+        height: var(--ddd-spacing-8, 32px);
+        border-radius: var(--ddd-radius-full, 9999px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: var(--ddd-font-weight-bold, bold);
+        font-size: var(--ddd-font-size-md, 1rem);
+        margin-right: var(--ddd-spacing-4, 16px);
+        background-color: var(--ddd-theme-default-beaverBlue, #1e407c);
+        color: var(--ddd-theme-default-white, #fff);
+      }
+      .dotted-line {
+        width: 2px;
+        height: 130%; /* Adjust height to avoid overlapping the step-circle */
+        border-left: 2px dashed var(--ddd-theme-primary, #1e407c);
+        position: absolute;
+        top: 240px; /* Start below the step-circle */
+        left: 38px; /* Align with the step-circle */
+        z-index: -1;
+      }
+
+      :host([ddd-primary]) .step-circle {
+        background-color: var(--ddd-theme-default-beaverBlue, #1e407c);
+        color: var(--ddd-theme-default-white, #fff);
+      }
+
+      .step-content {
+        flex: 1;
+        color: inherit;
+      }
+
+      @media (max-width: 768px) {
+        .step-wrapper {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .dotted-line {
+          left: 12px; /* Adjust for smaller screens */
+        }
+
+        .step-circle {
+          margin-bottom: var(--ddd-spacing-2, 8px);
+        }
+      }
+    `;
+  }
+
+  render() {
+    return html`
+      <div class="step-wrapper">
+        <div class="step-circle">${this.step}</div>
+        <div class="step-content">
+        ${this.title ? html`<div class="step-title">${this.title}</div>` : ''}
+        <slot></slot>
+        
+      </div>
+      <div class="dotted-line"></div>
+    `;
+  }
+}
+customElements.define('ddd-steps-list-item', DddStepsListItem);
+
+// ddd-steps-list definition
+class DddStepsList extends LitElement {
+  static get properties() {
+    return {
+      dddPrimary: { type: Boolean, attribute: 'ddd-primary', reflect: true }
+    };
+  }
+
+  constructor() {
+    super();
+    this.dddPrimary = false;
+  }
+
+  static get styles() {
+    return css`
+      :host {
+        display: block;
+        padding: var(--ddd-spacing-4, 16px);
+        box-sizing: border-box;
+        color: var(--ddd-theme-default-beaverBlue, #1e407c);
+
       }
     `;
   }
@@ -53,12 +143,6 @@ export class DddStepsList extends DDDSuper(I18NMixin(LitElement)) {
     this._validateChildren();
   }
 
-  updated(changedProps) {
-    if (changedProps.has("dddPrimary")) {
-      this._updatePrimaryAttribute();
-    }
-  }
-
   _onSlotChange() {
     this._validateChildren();
   }
@@ -66,53 +150,25 @@ export class DddStepsList extends DDDSuper(I18NMixin(LitElement)) {
   _validateChildren() {
     const children = Array.from(this.children);
     let stepCount = 0;
-    children.forEach((child) => {
+    children.forEach(child => {
       const tag = child.tagName.toLowerCase();
-      if (tag !== "ddd-steps-list-item") {
-        this.removeChild(child); // Remove invalid children
+      if (tag !== 'ddd-steps-list-item') {
+        this.removeChild(child);
       } else {
         stepCount++;
-        child.step = stepCount; // Assign step numbers
-        if (this.dddPrimary) {
-          child.setAttribute("data-primary", "");
-        } else {
-          child.removeAttribute("data-primary");
-        }
+        child.step = stepCount;
+        child.dddPrimary = this.dddPrimary;
       }
     });
   }
 
-  _updatePrimaryAttribute() {
-    const items = this.querySelectorAll("ddd-steps-list-item");
-    items.forEach((item) => {
-      if (this.dddPrimary) {
-        item.setAttribute("data-primary", "");
-      } else {
-        item.removeAttribute("data-primary");
-      }
-    });
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
-    //This method is called when the element is added to the DOM. 
-    // It calls validateChildren to check the children.
-    this.validateChildren();
-    //This method loops through the children of the component. 
-    // If a child element is not a ddd-steps-list-item, it removes the child and logs a warning.
-  }
-
-  validateChildren() {
-    const validTagName = 'DDD-STEPS-LIST-ITEM';
-    const children = Array.from(this.children);
-
-    children.forEach(child => {
-      if (child.tagName !== validTagName) {
-        console.warn(`Invalid child element <${child.tagName.toLowerCase()}> removed from <ddd-steps-list>. Only <ddd-steps-list-item> is allowed.`);
-        this.removeChild(child);
-      }
-    });
+  updated(changedProps) {
+    if (changedProps.has('dddPrimary')) {
+      const items = this.querySelectorAll('ddd-steps-list-item');
+      items.forEach(item => {
+        item.dddPrimary = this.dddPrimary;
+      });
+    }
   }
 }
-
-customElements.define(DddStepsList.tag, DddStepsList);
+customElements.define('ddd-steps-list', DddStepsList);

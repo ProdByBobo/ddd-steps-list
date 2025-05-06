@@ -1,86 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DDD Steps List</title>
-  <style>
-    /* Container resets the counter to start at 1 */
-    ddd-steps-list {
-      display: block; /* Make sure it's displayed as a block container */
-      counter-reset: step; /* Initialize the counter named "step" */
-      margin: 0 auto;
-      max-width: 800px;
-      padding: 1rem;
-      border: 1px solid #ccc;
-      
-    }
-
-    ddd-steps-list-item {
-      display: block;
-      margin-bottom: 1rem;
-      position: relative;
-      padding-left: 3rem;
-    }
-    
-    ddd-steps-list-item::after {
-      content: counter(step);
-      counter-increment: step;
-      position: absolute;
-      left: 0;
-      top: 0.3rem;
-      width: 2rem;
-      height: 2rem;
-      border-radius: 50%;
-      background-color: #003366;
-      color: #ffffff;
-      font-weight: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      line-height: 1;
-    }
-
-    ddd-steps-list-item::before {
-      content: attr(title);
-      display: block;
-      font-weight: bold;
-      font-size: 1.2em;
-      margin-bottom: 0.5em;
-      color: #003366;
-    }
-    .dotted-line {
-      position: absolute;
-      top: 150px;
-      left: 335px;
-      width: 10px;
-      height: 100%;
-      border-left: 2px dashed var(--ddd-theme-primary, #1e407c);
-      z-index: -1;
-    }
-    
-
-    h1 {
-      color: #003366;
-      text-align: center;
-    }
-    h3 {
-      color: #003366;
-      
-    }
-    h4 {
-      color: #003366;
-      text-align: center;
-    }
-    body
-    {
-      background-color: #f0f0f0;
-      font-family: Tahoma, Verdana, sans-serif;
-    }
-  </style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DDD Steps List Demo</title>
+    <script type="module" src="./ddd-steps-list.js"></script>
+  
+  </head>
   <body>
     
     <h1>Steps to Apply for First-Year Students</h1>
@@ -117,22 +43,5 @@
       </ddd-steps-list-item>
   
     </ddd-steps-list>
-
-  <script>
-    class DDDStepsList extends HTMLElement {
-      constructor() {
-        super();
-      }
-    }
-
-    class DDDStepsListItem extends HTMLElement {
-      constructor() {
-        super();
-      }
-    }
-
-    customElements.define('ddd-steps-list', DDDStepsList);
-    customElements.define('ddd-steps-list-item', DDDStepsListItem);
-  </script>
 </body>
 </html>
